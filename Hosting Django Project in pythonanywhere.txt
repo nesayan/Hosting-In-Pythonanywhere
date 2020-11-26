@@ -1,0 +1,170 @@
+********************************************************************************************
+Before hosting
+1. Open the settings.py
+2. Import os and STATIC_ROOT = os.path.join(BASE_DIR, "static")
+	Above is the better version of #STATIC_ROOT = "/home/sayan/myBlog_Project/static"
+3. And in terminal run ----> python manage.py collectstatic
+********************************************************************************************
+
+1) Make a ripository in github
+2) Copy the git clone link
+
+-----------------------------------------------------------------------------------
+USING GIT to push into GitHub
+
+Go to your directory where all the files and folders are present which you want to push
+using cd "directory"
+example: cd "D:\MY PROGRAMS\Django\myBlog_Project"
+
+echo "# Test" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/nesayan/Test.git
+git push -u origin main
+
+-----------------------------------------------------------------------------------
+
+
+OPEN PYTHONANYWHERE
+* Upload your code to Hosting Cloud Server
+* Set up a virtualenv and install Django and any other requirements
+* Set up your web app using the manual config option
+* Add any other setup (static and media files, env variables)
+
+1) Open bash console
+2) type ----> git clone https://github.com/nesayan/myBlog_Project.git
+3) type ----> mkvirtualenv --python=/usr/bin/python3.8  yourProjectName_virtualenv
+4) if virtual environment is not activated, then type ----> workon yourProjectName_virtualenv
+5) type ----> pip install -r requirements.txt
+
+So, the virtual env and required modules is installed in that virtual env
+Now its time to set up web app
+
+6) Click on Web on pythonanywhere
+7) Click on Add a new web app and click Next
+8) Choose Manual configuration
+9) Choose python 3.8 and select Next
+
+Now, we need to add Source code path, Virtual env path and Static file paths
+
+Enter the directories according to your project name
+
+10) Source code: /home/sayan/myBlog_Project
+11) Working directory: /home/sayan/
+12) WSGI config file: /var/www/sayan_pythonanywhere_com_wsgi.py
+
+13) Virtualenv: /home/sayan/.virtualenvs/myBlog_virtualenv
+
+14) Static files
+	URL		Directory
+	/static/	/home/sayan/myBlog_Project/static
+	/static/admin	/home/sayan/.virtualenvs/myBlog_virtualenv/lib/python3.8/site-packages/django/contrib/admin/static/admin
+
+Note: if you do not add the 2nd static file directory, your admin section will look horrible without css
+
+NOW, we need to edit the WSGI config file
+
+15) Go to Code section in Web & Click on /var/www/sayan_pythonanywhere_com_wsgi.py
+16) Paste the following but according to your project names (my outer directory is myBlog_Project and inner is myBlog + other app folders)
+
+	import os
+	import sys
+	
+	## assuming your django settings file is at '/home/sayan/mysite/mysite/settings.py'
+	## and your manage.py is is at '/home/sayan/mysite/manage.py'
+	path = '/home/sayan/myBlog_Project'
+	if path not in sys.path:
+	    sys.path.append(path)
+	
+	### this is the inner folder, where settings.py is located
+	os.environ['DJANGO_SETTINGS_MODULE'] = 'myBlog.settings'
+	#
+	## then:
+	from django.core.wsgi import get_wsgi_application
+	application = get_wsgi_application()
+
+
+NOW Go to Files
+
+17) Click on settings.py
+18) Edit ALLOWED_HOSTS= ['sayan.pythonanywhere.com']
+19) Import os and STATIC_ROOT = os.path.join(BASE_DIR, "static")
+	Above is the better version of #STATIC_ROOT = "/home/sayan/myBlog_Project/static"
+
+------------------------------------------------------------------------------------------
+END
+------------------------------------------------------------------------------------------
+
+Extras:
+
+1) CHANGE TIMEZONE
+In settings.py change 'UTC' to 'Asia/Kolkata'
+
+2) RELATED STATIC FILES IMAGES
+If you have image files(static files)----Add this in settings.py
+Create a static folder in root directory (in case you have not created by collectstatic)
+and keep the image in there OR you can create another folder named 'img' and keep images over there
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    '/var/www/static/',
+]
+
+3) RELATED CUSTOM FILTERS IN DJANGO
+If you want to create custom filters in django, then create a folder named
+"templatetags", at the same level as models.py, views.py, etc.
+	* create: "__init__.py" file to ensure the directory is treated as a Python package.
+	* create "extras.py" and in this file write
+
+		from django import template
+	
+		register = template.Library()
+		@register.filter(name= 'yourFunction')
+
+		def yourFunction(leftParam1, rightParam2):
+			return statement
+	* load the extras file in that HTML file: {% load extras %}
+
+4) CHANGING DATABASE (to MySQL)
+Change the default to this one with respective name, user, password, host, port of database
+First connect to mysql using CMD
+
+mysql -u root -p
+12345678
+
+create database databasename;
+
+Then, edit DATABASE in settings.py
+
+	'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'databasename',
+        'USER': 'root',
+        'PASSWORD': '12345678',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    }
+In pythonanywhere, my database settings looks like
+
+	'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sayan$blogDB',
+        'USER': 'sayan',
+        'PASSWORD': '1211019990a',
+        'HOST': 'sayan.mysql.pythonanywhere-services.com',
+    }
+
+To backup pythonanywhere database:
+Open its bash and run these two commands
+
+	* cd
+	* mysqldump -u yourusername -h yourusername.mysql.pythonanywhere-services.com --set-gtid-purged=OFF 'yourusername$dbname'  > db-backup.sql
+
+To import the backed-up database:
+First upload the backedup sql file in /home/sayan directory
+Create database and open bash, then execute this
+
+	* mysql -u yourusername -h yourusername.mysql.pythonanywhere-services.com 'yourusername$dbname'  < db-backup.sql
